@@ -6,8 +6,8 @@ body { margin: 0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic P
 
 .chat { background:#121214; border:1px solid #222; border-radius: 12px; padding: 12px; height: 65vh; overflow: auto; }
 .msg { padding: 10px 12px; border-radius: 12px; margin: 8px 0; max-width: 90%; white-space: pre-wrap; }
-.user { background:#1f2937; margin-left: auto; }
-.bot  { background:#27272a; margin-right: auto; }
+.user {  margin-left: auto; }
+.bot  {  margin-right: auto; }
 
 .composer { display: flex; gap: 8px; margin-top: 12px; }
 #input { flex: 1; padding: 12px; border-radius: 12px; border:1px solid #222; background:#0f0f10; color:#fff; }
