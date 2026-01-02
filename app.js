@@ -35,8 +35,21 @@ function quantizeTo5(score) {
 }
 
 function renderGauge() {
-  if (!gaugeInner) return; // HTML追加してない場合でも落ちない
-  gaugeInner.style.width = `${quantizeTo5(score)}%`;
+  if (!gaugeInner) return;
+
+  // 幅（段階的・攻略しづらい）
+  const width = quantizeTo5(score);
+  gaugeInner.style.width = `${width}%`;
+
+  // 明るさ（=好意の温度感）
+  let opacity = 0.35; // 冷え切り
+  if (score >= 80) opacity = 0.95;       // かなり好意
+  else if (score >= 60) opacity = 0.8;   // 好意
+  else if (score >= 40) opacity = 0.6;   // 様子見
+  else if (score >= 20) opacity = 0.45;  // 警戒
+  else opacity = 0.3;                    // 冷め
+
+  gaugeInner.style.opacity = opacity;
 }
 
 function resetChat() {
