@@ -7,8 +7,15 @@ const chat = document.getElementById("chat");
 const characterSelect = document.getElementById("character");
 const resetBtn = document.getElementById("reset");
 
+// ▼ 好感度ゲージ（右上）
+const gaugeInner = document.getElementById("affGaugeInner");
+
+// 会話状態
 let history = [];
 let characterId = null;
+
+// 好感度（0〜100の内部値） ※数字はUIに出さない
+let score = 50;
 
 function addMsg(text, who) {
   const div = document.createElement("div");
@@ -18,9 +25,27 @@ function addMsg(text, who) {
   chat.scrollTop = chat.scrollHeight;
 }
 
+// 5段階に丸めて「だいたいこのくらい感」を出す（攻略しづらい）
+function quantizeTo5(score) {
+  if (score >= 80) return 100;
+  if (score >= 60) return 75;
+  if (score >= 40) return 50;
+  if (score >= 20) return 25;
+  return 0;
+}
+
+function renderGauge() {
+  if (!gaugeInner) return; // HTML追加してない場合でも落ちない
+  gaugeInner.style.width = `${quantizeTo5(score)}%`;
+}
+
 function resetChat() {
   history = [];
   chat.innerHTML = "";
+
+  score = 50;
+  renderGauge();
+
   addMsg("……何？（選んだキャラで会話が始まるよ）", "bot");
 }
 
@@ -51,17 +76,24 @@ async function send(message) {
       characterId,
       message,
       history,
+      // ★ Workersへ現在スコアも渡す（AI採点で delta を決めるため）
+      state: { score },
     }),
   });
 
   const data = await res.json();
+
+  // ★ Workersから新しいスコアが返ってきたら更新
+  if (data.state && typeof data.state.score === "number") {
+    score = data.state.score;
+    renderGauge();
+  }
 
   const reply = data.reply || "……";
   addMsg(reply, "bot");
   history.push({ role: "assistant", content: reply });
 
   if (data.ended) {
-    // 終了したら入力を止める（好みで）
     input.disabled = true;
     addMsg(`【終了】理由: ${data.reason || "不明"}`, "bot");
   }

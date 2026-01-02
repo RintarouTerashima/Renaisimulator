@@ -15,3 +15,39 @@ body { margin: 0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic P
 #send:disabled { opacity:.5; cursor:not-allowed; }
 .bar{display:flex;gap:12px;align-items:center;margin:8px 0 12px}
 .bar select,.bar button{padding:8px;border-radius:10px}
+.gauge{
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  width: 140px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 9999;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.gauge-inner{
+  height: 100%;
+  width: 60%;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.55);
+  transition: width 180ms ease;
+}
+
+/* 5段の区切り線（見た目だけ） */
+.gauge::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(20% - 1px),
+      rgba(255,255,255,0.45) calc(20% - 1px),
+      rgba(255,255,255,0.45) 20%
+    );
+  pointer-events:none;
+}
