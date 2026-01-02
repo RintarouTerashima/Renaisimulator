@@ -138,6 +138,8 @@ function resetChat() {
   history = [];
   chat.innerHTML = "";
 
+  lastWho = null;   
+
   score = 50;
   renderGauge();
 
