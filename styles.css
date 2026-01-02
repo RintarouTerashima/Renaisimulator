@@ -55,3 +55,144 @@ body { margin: 0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic P
     );
   pointer-events:none;
 }
+/* ===== LINE風の画面感 ===== */
+
+.chat{
+  background: #8fd5ff; /* 水色 */
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
+  padding: 14px;
+  height: 65vh;
+  overflow: auto;
+}
+
+/* 行 */
+.row{
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+/* 左右寄せ */
+.row.user{ justify-content: flex-end; }
+.row.bot{ justify-content: flex-start; }
+
+/* アバター */
+.avatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.avatar-hidden{
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 発話メタ（名前＋吹き出し） */
+.meta{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 名前（botだけ表示） */
+.name{
+  font-size: 11px;
+  opacity: 0.75;
+  padding-left: 4px;
+}
+.name-hidden{
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* 時刻 */
+.time{
+  font-size: 10px;
+  opacity: 0.65;
+  min-width: 34px;
+  text-align: center;
+}
+.row.user .time{ order: 0; } /* userは左に時刻 */
+.row.bot  .time{ order: 2; } /* botは右に時刻 */
+
+/* 吹き出し */
+.bubble{
+  position: relative;
+  max-width: min(76%, 520px);
+  padding: 10px 12px;
+  border-radius: 16px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  font-size: 14px;
+}
+
+/* bot: 白 */
+.row.bot .bubble{
+  background: #ffffff;
+  color: #111827;
+  border-top-left-radius: 8px;
+}
+
+/* user: 緑 */
+.row.user .bubble{
+  background: #7CFC6A;
+  color: #0b0b0c;
+  border-top-right-radius: 8px;
+}
+
+/* しっぽ */
+.row.bot .bubble::before{
+  content:"";
+  position:absolute;
+  left: -8px;
+  bottom: 10px;
+  border-width: 8px 10px 8px 0;
+  border-style: solid;
+  border-color: transparent #ffffff transparent transparent;
+}
+.row.user .bubble::before{
+  content:"";
+  position:absolute;
+  right: -8px;
+  bottom: 10px;
+  border-width: 8px 0 8px 10px;
+  border-style: solid;
+  border-color: transparent transparent transparent #7CFC6A;
+}
+
+.composer{
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+.composer input{
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.95);
+}
+
+.composer .send{
+  border-radius: 999px;
+  padding: 10px 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(124,252,106,0.9);
+  cursor: pointer;
+}

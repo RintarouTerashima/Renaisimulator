@@ -1,5 +1,15 @@
 const WORKER_URL = "https://noisy-tree-08d5.love-gpt.workers.dev";
 
+const AVATAR_BY_CHARACTER_ID = {
+  gentle_rules: "./assets/gentle_rules.jpg",
+  sharp_pop:"./assets/sharp_pop.jpg",
+  // 追加キャラが増えたらここに足す
+  // example: tsundere: "./assets/tsundere.png",
+};
+
+const USER_AVATAR = "./assets/user.jpg"; // 自分側（任意）
+
+
 const form = document.querySelector("form");
 const input = document.querySelector("input");
 const chat = document.getElementById("chat");
@@ -17,11 +27,74 @@ let characterId = null;
 // 好感度（0〜100の内部値） ※数字はUIに出さない
 let score = 50;
 
+let characters = [];        // キャラ一覧を保存
+let characterMap = {};      // id → キャラ情報
+
+
+function nowHHMM() {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+// 直前メッセージと同じ発話者なら、アバター/名前を省略してグループ化
+let lastWho = null;
+
 function addMsg(text, who) {
-  const div = document.createElement("div");
-  div.className = who;
-  div.textContent = text;
-  chat.appendChild(div);
+  const row = document.createElement("div");
+  row.className = `row ${who}`;
+
+  const isGrouped = lastWho === who; // 同じ連続ならまとめる
+  lastWho = who;
+
+  const avatar = document.createElement("img");
+  avatar.className = "avatar";
+  if (who === "user") {
+    avatar.src = USER_AVATAR;
+    avatar.alt = "you";
+  } else {
+    avatar.src = AVATAR_BY_CHARACTER_ID[characterId] || "./assets/bot.png";
+    avatar.alt = "bot";
+  }
+  if (isGrouped) avatar.classList.add("avatar-hidden");
+
+  const meta = document.createElement("div");
+  meta.className = "meta";
+
+  const name = document.createElement("div");
+  name.className = "name";
+  if (who === "bot") {
+    // キャラ名表示（botだけ）
+    name.textContent = characterMap?.[characterId]?.name || "キャラ";
+  } else {
+    name.textContent = "";
+  }
+  if (isGrouped) name.classList.add("name-hidden");
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = text;
+
+  const time = document.createElement("div");
+  time.className = "time";
+  time.textContent = nowHHMM();
+
+  meta.appendChild(name);
+  meta.appendChild(bubble);
+
+  // 左右の並び
+  if (who === "user") {
+    row.appendChild(time);
+    row.appendChild(meta);
+    row.appendChild(avatar);
+  } else {
+    row.appendChild(avatar);
+    row.appendChild(meta);
+    row.appendChild(time);
+  }
+
+  chat.appendChild(row);
   chat.scrollTop = chat.scrollHeight;
 }
 
@@ -67,6 +140,10 @@ async function loadCharacters() {
   const data = await res.json();
   const list = data.characters || [];
 
+  // フロント側で保持
+  characters = list;
+  characterMap = Object.fromEntries(list.map(c => [c.id, c]));
+
   characterSelect.innerHTML = "";
   for (const c of list) {
     const opt = document.createElement("option");
@@ -77,6 +154,7 @@ async function loadCharacters() {
 
   characterId = list[0]?.id || null;
 }
+
 
 async function send(message) {
   addMsg(message, "user");
@@ -136,3 +214,4 @@ resetBtn.addEventListener("click", () => {
   await loadCharacters();
   resetChat();
 })();
+
