@@ -13,3 +13,5 @@ body { margin: 0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic P
 #input { flex: 1; padding: 12px; border-radius: 12px; border:1px solid #222; background:#0f0f10; color:#fff; }
 #send { padding: 12px 14px; border-radius: 12px; border:0; background:#fff; color:#000; font-weight: 700; cursor:pointer; }
 #send:disabled { opacity:.5; cursor:not-allowed; }
+.bar{display:flex;gap:12px;align-items:center;margin:8px 0 12px}
+.bar select,.bar button{padding:8px;border-radius:10px}
