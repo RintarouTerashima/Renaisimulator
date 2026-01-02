@@ -1,56 +1,38 @@
-// ★ここを自分のWorkers URLに変える
-// 例: const WORKER_BASE = "https://love-gpt-worker.yourname.workers.dev";
-const WORKER_BASE = "https://noisy-tree-08d5.love-gpt.workers.dev/  ";
+// ★ あなたの Workers URL
+const WORKER_URL = "https://noisy-tree-08d5.love-gpt.workers.dev";
 
-const chatEl = document.getElementById("chat");
-const formEl = document.getElementById("form");
-const inputEl = document.getElementById("input");
-const sendBtn = document.getElementById("send");
+const form = document.querySelector("form");
+const input = document.querySelector("input");
+const chat = document.getElementById("chat");
 
-// 超簡易：履歴を保持（systemはWorkers側で付ける）
-let history = [];
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-function addMessage(text, who) {
-  const div = document.createElement("div");
-  div.className = `msg ${who}`;
-  div.textContent = text;
-  chatEl.appendChild(div);
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
+  const message = input.value.trim();
+  if (!message) return;
 
-async function sendMessage(message) {
-  sendBtn.disabled = true;
+  // ユーザー発言を表示
+  const user = document.createElement("div");
+  user.textContent = message;
+  user.className = "user";
+  chat.appendChild(user);
 
-  addMessage(message, "user");
-  history.push({ role: "user", content: message });
+  input.value = "";
 
-  const resp = await fetch(`${WORKER_BASE}/api/chat`, {
+  // WorkersにPOST
+  const res = await fetch(WORKER_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify({ message }),
   });
 
-  if (!resp.ok) {
-    const t = await resp.text().catch(() => "");
-    addMessage(`エラー: ${resp.status}\n${t}`, "bot");
-    sendBtn.disabled = false;
-    return;
-  }
+  const data = await res.json();
 
-  const data = await resp.json();
-  const reply = (data.reply || "").trim() || "……（無言）";
-  addMessage(reply, "bot");
-  history.push({ role: "assistant", content: reply });
-
-  sendBtn.disabled = false;
-}
-
-formEl.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const message = inputEl.value.trim();
-  if (!message) return;
-  inputEl.value = "";
-  await sendMessage(message);
+  // AIの返事を表示
+  const bot = document.createElement("div");
+  bot.textContent = data.reply || "……";
+  bot.className = "bot";
+  chat.appendChild(bot);
 });
 
 // 初期表示
