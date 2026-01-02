@@ -41,32 +41,41 @@ function nowHHMM() {
 // 直前メッセージと同じ発話者なら、アバター/名前を省略してグループ化
 let lastWho = null;
 
-function addMsg(text, who) {
+function addMsg(text, who, meta = {}) {
   const row = document.createElement("div");
   row.className = `row ${who}`;
 
-  const isGrouped = lastWho === who; // 同じ連続ならまとめる
+  const isGrouped = lastWho === who;
   lastWho = who;
 
   const avatar = document.createElement("img");
   avatar.className = "avatar";
+
   if (who === "user") {
     avatar.src = USER_AVATAR;
     avatar.alt = "you";
   } else {
-    avatar.src = AVATAR_BY_CHARACTER_ID[characterId] || "./assets/bot.png";
+    const botId = meta.characterId || characterId; // ★その発言に紐づくIDを優先
+    avatar.src = AVATAR_BY_CHARACTER_ID[botId] || "./assets/bot.png";
     avatar.alt = "bot";
   }
+
+  // 画像ロード失敗時の保険（壊れアイコン防止）
+  avatar.onerror = () => {
+    avatar.onerror = null;
+    avatar.src = "./assets/bot.png";
+  };
+
   if (isGrouped) avatar.classList.add("avatar-hidden");
 
-  const meta = document.createElement("div");
-  meta.className = "meta";
+  const metaDiv = document.createElement("div");
+  metaDiv.className = "meta";
 
   const name = document.createElement("div");
   name.className = "name";
   if (who === "bot") {
-    // キャラ名表示（botだけ）
-    name.textContent = characterMap?.[characterId]?.name || "キャラ";
+    const botId = meta.characterId || characterId;
+    name.textContent = characterMap?.[botId]?.name || "キャラ";
   } else {
     name.textContent = "";
   }
@@ -80,23 +89,23 @@ function addMsg(text, who) {
   time.className = "time";
   time.textContent = nowHHMM();
 
-  meta.appendChild(name);
-  meta.appendChild(bubble);
+  metaDiv.appendChild(name);
+  metaDiv.appendChild(bubble);
 
-  // 左右の並び
   if (who === "user") {
     row.appendChild(time);
-    row.appendChild(meta);
+    row.appendChild(metaDiv);
     row.appendChild(avatar);
   } else {
     row.appendChild(avatar);
-    row.appendChild(meta);
+    row.appendChild(metaDiv);
     row.appendChild(time);
   }
 
   chat.appendChild(row);
   chat.scrollTop = chat.scrollHeight;
 }
+
 
 // 5段階に丸めて「だいたいこのくらい感」を出す（攻略しづらい）
 function quantizeTo5(score) {
@@ -132,7 +141,7 @@ function resetChat() {
   score = 50;
   renderGauge();
 
-  addMsg("……何？（選んだキャラで会話が始まるよ）", "bot");
+  addMsg("……何？（選んだキャラで会話が始まるよ）", "bot", { characterId });
 }
 
 async function loadCharacters() {
@@ -180,9 +189,9 @@ async function send(message) {
     renderGauge();
   }
 
-  const reply = data.reply || "……";
-  addMsg(reply, "bot");
-  history.push({ role: "assistant", content: reply });
+const reply = data.reply || "……";
+addMsg(reply, "bot", { characterId: data?.character?.id || characterId });
+history.push({ role: "assistant", content: reply });
 
   if (data.ended) {
     input.disabled = true;

@@ -130,7 +130,7 @@ body { margin: 0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic P
   border-radius: 16px;
   line-height: 1.45;
   white-space: pre-wrap;
-  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  box-shadow: none;
   font-size: 14px;
 }
 
